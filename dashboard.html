@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONVERSIQ — Agency Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #080C18;
+    --surface: #0E1628;
+    --surface2: #151E35;
+    --surface3: #1C2843;
+    --border: #1F2D4A;
+    --border2: #2A3A5C;
+    --gold: #F0A500;
+    --gold-dim: #C47F00;
+    --gold-glow: rgba(240,165,0,0.15);
+    --green: #22C55E;
+    --red: #EF4444;
+    --blue: #3B82F6;
+    --purple: #A855F7;
+    --text: #E8EEF8;
+    --text-2: #8DA0C0;
+    --text-3: #4A6080;
+    --sidebar-w: 260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .logo-mark span {
+    color: var(--gold);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .nav-section {
+    padding: 20px 16px 8px;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 0 8px;
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+
+  .nav-item.active {
+    background: var(--gold-glow);
+    color: var(--gold);
+    border: 1px solid rgba(240,165,0,0.2);
+  }
+
+  .nav-item .icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--gold);
+    color: var(--bg);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .user-card:hover { background: var(--surface2); }
+
+  .user-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), #FF8C00);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: var(--bg);
+    font-family: 'Syne', sans-serif;
+  }
+
+  .user-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .user-role { font-size: 11px; color: var(--text-3); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    height: 64px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    width: 240px;
+  }
+
+  .search-box input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  .search-box input::placeholder { color: var(--text-3); }
+
+  .topbar-btn {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.15s;
+    color: var(--text-2);
+  }
+
+  .topbar-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover { background: #FFB800; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+  .content {
+    padding: 32px;
+    flex: 1;
+  }
+
+  /* ── STATS ROW ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border2); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-color);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 12px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-change {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .stat-change.up { color: var(--green); }
+  .stat-change.down { color: var(--red); }
+
+  /* ── GRID LAYOUT ── */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .full-width { grid-column: 1 / -1; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .card-sub {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 1px;
+  }
+
+  .card-actions { margin-left: auto; display: flex; gap: 8px; }
+
+  .card-body { padding: 22px; }
+
+  /* ── CHART ── */
+  .chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+
+  /* ── CLIENT TABLE ── */
+  .client-table { width: 100%; border-collapse: collapse; }
+
+  .client-table th {
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    padding: 0 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .client-table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .client-table tr:last-child td { border-bottom: none; }
+
+  .client-table tr:hover td { background: var(--surface2); }
+
+  .client-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-dot {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .brand-name { font-weight: 600; font-size: 14px; }
+  .brand-type { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-pill.active { background: rgba(34,197,94,0.12); color: var(--green); }
+  .status-pill.paused { background: rgba(248,196,0,0.12); color: #F8C400; }
+  .status-pill.setup { background: rgba(59,130,246,0.12); color: var(--blue); }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--surface3);
+    color: var(--text-2);
+    font-family: 'DM Mono', monospace;
+    border: 1px solid var(--border);
+  }
+
+  /* ── ACTIVITY FEED ── */
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+
+  .activity-icon {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .activity-text { font-size: 13px; line-height: 1.5; }
+  .activity-text strong { color: var(--text); font-weight: 600; }
+  .activity-time { font-size: 11px; color: var(--text-3); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+  /* ── MINI METRICS ── */
+  .mini-metrics { display: flex; flex-direction: column; gap: 14px; }
+
+  .mini-metric {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mini-label { font-size: 13px; color: var(--text-2); }
+  .mini-value { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  /* ── CAMPAIGN TABLE ── */
+  .campaign-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 80px 100px 80px;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+
+  .campaign-row:hover { background: var(--surface2); }
+  .campaign-row:last-child { border-bottom: none; }
+
+  .campaign-row.header {
+    padding-top: 0;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+    padding: 16px 22px 12px;
+    border-bottom: 1px solid var(--border);
+    pointer-events: none;
+  }
+
+  .campaign-name { font-size: 14px; font-weight: 500; }
+  .campaign-brand { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: modalIn 0.2s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+  .modal-body { padding: 24px 28px; }
+
+  .modal-close {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-2);
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); border-color: var(--border2); }
+
+  .form-group { margin-bottom: 18px; }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-input:focus { border-color: var(--gold); }
+
+  select.form-input { cursor: pointer; }
+
+  .form-textarea {
+    min-height: 80px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .modal-footer {
+    padding: 0 28px 24px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  /* ── CHANNEL BADGE ── */
+  .channel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .channel-badge.whatsapp { background: rgba(37,211,102,0.12); color: #25D366; }
+  .channel-badge.sms { background: rgba(59,130,246,0.12); color: var(--blue); }
+  .channel-badge.both { background: rgba(168,85,247,0.12); color: var(--purple); }
+
+  /* ── PAGE TABS ── */
+  .page-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    width: fit-content;
+  }
+
+  .page-tab {
+    padding: 8px 18px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-2);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .page-tab.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 14px;
+    color: var(--text);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastIn 0.3s ease;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Subtle grid pattern bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .sidebar, .main { position: relative; z-index: 1; }
+
+  /* ─── ANIMATIONS ─── */
+  .fade-in {
+    animation: fadeIn 0.4s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card { animation: fadeIn 0.4s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+  /* Demo link button */
+  .demo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(37,211,102,0.1);
+    border: 1px solid rgba(37,211,102,0.3);
+    border-radius: 6px;
+    font-size: 12px;
+    color: #25D366;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .demo-link:hover { background: rgba(37,211,102,0.2); }
+
+  /* ── VERTICAL TABS ── */
+  .section { display: none; }
+  .section.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">CONVERS<span>IQ</span></div>
+    <div class="logo-sub">Agency Platform</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" onclick="navigate('overview', this)">
+      <span class="icon">◈</span> Overview
+    </div>
+    <div class="nav-item" onclick="navigate('clients', this)">
+      <span class="icon">⬡</span> Clients
+      <span class="nav-badge">8</span>
+    </div>
+    <div class="nav-item" onclick="navigate('campaigns', this)">
+      <span class="icon">◎</span> Campaigns
+    </div>
+    <div class="nav-item" onclick="navigate('analytics', this)">
+      <span class="icon">⌬</span> Analytics
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Configure</div>
+    <div class="nav-item" onclick="navigate('personas', this)">
+      <span class="icon">◉</span> AI Personas
+    </div>
+    <div class="nav-item" onclick="navigate('integrations', this)">
+      <span class="icon">⊞</span> Integrations
+    </div>
+    <div class="nav-item" onclick="navigate('channels', this)">
+      <span class="icon">⊃</span> Channels
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Simulate</div>
+    <a href="simulator.html" class="nav-item" style="color: #25D366; border: 1px solid rgba(37,211,102,0.2); background: rgba(37,211,102,0.05);">
+      <span class="icon">▷</span> Live AI Simulator
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">AG</div>
+      <div>
+        <div class="user-name">Agency Admin</div>
+        <div class="user-role">Owner · All Clients</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <header class="topbar">
+    <div class="page-title" id="page-title">Overview</div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span style="color:var(--text-3);font-size:14px;">⌕</span>
+        <input type="text" placeholder="Search clients, campaigns...">
+      </div>
+      <div class="topbar-btn" title="Notifications">🔔</div>
+      <button class="btn-primary" onclick="openModal('add-client')">+ Add Client</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ── OVERVIEW ── -->
+    <section class="section active" id="sec-overview">
+
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent-color: var(--gold)">
+          <div class="stat-label">Active Clients</div>
+          <div class="stat-value">8</div>
+          <div class="stat-change up">↑ 2 this month</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--green)">
+          <div class="stat-label">Conversations / Day</div>
+          <div class="stat-value">1,284</div>
+          <div class="stat-change up">↑ 18% vs last week</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--blue)">
+          <div class="stat-label">Campaigns Running</div>
+          <div class="stat-value">12</div>
+          <div class="stat-change up">↑ 4 new live</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--purple)">
+          <div class="stat-label">Monthly Revenue (₹)</div>
+          <div class="stat-value">7.2L</div>
+          <div class="stat-change up">↑ 34% MoM</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+
+        <!-- Conversation Trend Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Conversation Volume</div>
+              <div class="card-sub">Last 30 days across all clients</div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-ghost" style="font-size:12px;padding:6px 12px;">30D</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap">
+              <canvas id="convChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Metrics -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Platform Health</div>
+              <div class="card-sub">Real-time indicators</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="mini-metrics">
+              <div>
+                <div class="mini-metric">
+                  <span class="mini-label">Avg. Response Time</span>
+                  <span class="mini-value" style="color:var(--green)">0.8s</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:92%;background:var(--green)"></div></div>
+              </div>
+              <div>
+                <div class="mini-metric">
+                  <span class="mini-label">AI Resolution Rate</span>
+                  <span class="mini-value" style="color:var(--green)">84%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:84%;background:var(--green)"></div></div>
+              </div>
+              <div>
+                <div class="mini-metric">
+                  <span class="mini-label">Human Escalations</span>
+                  <span class="mini-value" style="color:#F8C400">16%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:16%;background:#F8C400"></div></div>
+              </div>
+              <div>
+                <div class="mini-metric">
+                  <span class="mini-label">CSAT Score</span>
+                  <span class="mini-value" style="color:var(--gold)">4.7 / 5</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:94%;background:var(--gold)"></div></div>
+              </div>
+              <div>
+                <div class="mini-metric">
+                  <span class="mini-label">Platform Uptime</span>
+                  <span class="mini-value" style="color:var(--green)">99.97%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:99.97%;background:var(--green)"></div></div>
+              </div>
+              <div>
+                <div class="mini-metric">
+                  <span class="mini-label">WhatsApp Delivery</span>
+                  <span class="mini-value" style="color:var(--green)">98.2%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:98%;background:#25D366)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Client Table -->
+        <div class="card full-width">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Client Portfolio</div>
+              <div class="card-sub">8 active deployments</div>
+            </div>
+            <div class="card-actions">
+              <a href="simulator.html" class="demo-link">▷ Open Simulator</a>
+              <button class="btn-primary" onclick="openModal('add-client')">+ Add Client</button>
+            </div>
+          </div>
+          <table class="client-table">
+            <thead>
+              <tr>
+                <th>Brand</th>
+                <th>Vertical</th>
+                <th>Channel</th>
+                <th>Conversations</th>
+                <th>CSAT</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="client-tbody">
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card fade-in" style="animation-delay:0.3s">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Live Activity</div>
+            <div class="card-sub">Platform events in real-time</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="activity-list" id="activity-list"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── CLIENTS ── -->
+    <section class="section" id="sec-clients">
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent-color: var(--gold)">
+          <div class="stat-label">Total Clients</div>
+          <div class="stat-value">8</div>
+          <div class="stat-change up">↑ 2 added this month</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--green)">
+          <div class="stat-label">Active Agents</div>
+          <div class="stat-value">6</div>
+          <div class="stat-change up">All responding</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--blue)">
+          <div class="stat-label">In Setup</div>
+          <div class="stat-value">2</div>
+          <div class="stat-change up">Launch this week</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--purple)">
+          <div class="stat-label">Avg. Retainer (₹)</div>
+          <div class="stat-value">90K</div>
+          <div class="stat-change up">↑ vs ₹70K target</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">All Clients</div></div>
+          <div class="card-actions">
+            <button class="btn-primary" onclick="openModal('add-client')">+ Add Client</button>
+          </div>
+        </div>
+        <table class="client-table">
+          <thead>
+            <tr>
+              <th>Brand</th><th>Vertical</th><th>Channel</th><th>Conversations</th><th>CSAT</th><th>Retainer</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="client-tbody-2"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── CAMPAIGNS ── -->
+    <section class="section" id="sec-campaigns">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Active Campaigns</div><div class="card-sub">All running automations & broadcasts</div></div>
+          <div class="card-actions">
+            <button class="btn-primary" onclick="openModal('new-campaign')">+ New Campaign</button>
+          </div>
+        </div>
+        <div class="campaign-row header">
+          <span>Campaign</span><span>Type</span><span>Reach</span><span>Conv. Rate</span><span>Status</span>
+        </div>
+        <div id="campaigns-list"></div>
+      </div>
+    </section>
+
+    <!-- ── ANALYTICS ── -->
+    <section class="section" id="sec-analytics">
+      <div class="stats-grid">
+        <div class="stat-card" style="--accent-color: var(--gold)">
+          <div class="stat-label">Total Conversations</div>
+          <div class="stat-value">38,420</div>
+          <div class="stat-change up">↑ This month</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--green)">
+          <div class="stat-label">Revenue Attributed</div>
+          <div class="stat-value">₹24L</div>
+          <div class="stat-change up">↑ Via WA/SMS this month</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--blue)">
+          <div class="stat-label">Avg. Cart Recovery</div>
+          <div class="stat-value">31%</div>
+          <div class="stat-change up">↑ vs 12% email benchmark</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--purple)">
+          <div class="stat-label">Messages Delivered</div>
+          <div class="stat-value">96.8K</div>
+          <div class="stat-change up">↑ 98.2% success rate</div>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Revenue by Client</div></div>
+          <div class="card-body"><div class="chart-wrap"><canvas id="revenueChart"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Channel Split</div></div>
+          <div class="card-body"><div class="chart-wrap" style="height:200px"><canvas id="channelChart"></canvas></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PERSONAS ── -->
+    <section class="section" id="sec-personas">
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">AI Persona Library</div><div class="card-sub">Brand-trained agents</div></div>
+            <div class="card-actions"><button class="btn-primary" onclick="openModal('new-persona')">+ New Persona</button></div>
+          </div>
+          <div class="card-body" id="personas-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Persona Settings</div></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Persona Name</label>
+              <input class="form-input" value="Luna — AURA Jewellery" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Brand Voice</label>
+              <textarea class="form-input form-textarea" readonly>Refined, aspirational, and warmly personal. Luna speaks like a trusted jewellery consultant — knowledgeable about craftsmanship, sensitive to the emotional weight of purchases, and never rushed.</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Languages Enabled</label>
+              <input class="form-input" value="English, Hindi, Arabic, French" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Escalation Trigger</label>
+              <input class="form-input" value="Orders > ₹50,000 | Complaint keyword detected" readonly>
+            </div>
+            <a href="simulator.html?brand=jewellery" class="demo-link" style="margin-top:8px;display:inline-flex">▷ Preview This Persona</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── INTEGRATIONS ── -->
+    <section class="section" id="sec-integrations">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Connected Integrations</div><div style="margin-left:auto"><button class="btn-primary" onclick="showToast('Integration marketplace coming soon!')">+ Browse Marketplace</button></div></div>
+        <div class="card-body">
+          <div id="integrations-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CHANNELS ── -->
+    <section class="section" id="sec-channels">
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Channel Configuration</div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:16px;" id="channels-list"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">SMS vs WhatsApp</div></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:16px;">Both channels are fully supported. SMS reaches customers on any phone without app requirements, making it ideal for markets with lower smartphone penetration or where WhatsApp adoption is lower (e.g. US, UK). WhatsApp enables richer media, read receipts, and lower cost at scale in markets where it dominates (India, MENA, LATAM).</p>
+            <div class="chart-wrap" style="height:160px"><canvas id="channelCompare"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ── ADD CLIENT MODAL ── -->
+<div class="modal-overlay" id="modal-add-client">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Client</div>
+      <div class="modal-close" onclick="closeModal('add-client')">×</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Brand Name</label>
+        <input class="form-input" id="new-brand-name" placeholder="e.g. AURA Jewellery">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vertical</label>
+        <select class="form-input" id="new-brand-vertical">
+          <option>Premium Jewellery</option>
+          <option>Athleisure</option>
+          <option>Fragrances</option>
+          <option>Watches</option>
+          <option>E-Commerce</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Channel</label>
+        <select class="form-input" id="new-brand-channel">
+          <option>WhatsApp</option>
+          <option>SMS</option>
+          <option>Both</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tier</label>
+        <select class="form-input" id="new-brand-tier">
+          <option>Starter — ₹25K–40K/mo</option>
+          <option>Growth — ₹60K–1L/mo</option>
+          <option>Enterprise — ₹1.5L+/mo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Brand Voice Brief</label>
+        <textarea class="form-input form-textarea" id="new-brand-voice" placeholder="Describe the brand's tone, values and communication style..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('add-client')">Cancel</button>
+      <button class="btn-primary" onclick="addClient()">Create Client & AI Persona</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NEW CAMPAIGN MODAL ── -->
+<div class="modal-overlay" id="modal-new-campaign">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Campaign</div>
+      <div class="modal-close" onclick="closeModal('new-campaign')">×</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Campaign Name</label>
+        <input class="form-input" placeholder="e.g. Summer Drop Announcement">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Client</label>
+        <select class="form-input" id="campaign-client-select"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Campaign Type</label>
+        <select class="form-input">
+          <option>Broadcast Message</option>
+          <option>Abandoned Cart Recovery</option>
+          <option>Post-Purchase Follow-up</option>
+          <option>Restock Alert</option>
+          <option>Birthday / Anniversary</option>
+          <option>Loyalty Reward</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Channel</label>
+        <select class="form-input">
+          <option>WhatsApp</option>
+          <option>SMS</option>
+          <option>Both</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message Template</label>
+        <textarea class="form-input form-textarea" placeholder="Hi {{name}}, your favourite {{product}} is back in stock..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('new-campaign')">Cancel</button>
+      <button class="btn-primary" onclick="launchCampaign()">Launch Campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NEW PERSONA MODAL ── -->
+<div class="modal-overlay" id="modal-new-persona">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Create AI Persona</div>
+      <div class="modal-close" onclick="closeModal('new-persona')">×</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Persona Name</label>
+        <input class="form-input" placeholder="e.g. Aria — For Brand X">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Assign to Client</label>
+        <select class="form-input" id="persona-client-select"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Personality Archetype</label>
+        <select class="form-input">
+          <option>Refined Consultant (Luxury/Jewellery)</option>
+          <option>Energetic Coach (Athleisure/Fitness)</option>
+          <option>Sensory Storyteller (Fragrance/Beauty)</option>
+          <option>Precision Expert (Watches/Tech)</option>
+          <option>Helpful Companion (General E-Commerce)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Brand Voice</label>
+        <textarea class="form-input form-textarea" placeholder="Describe tone, values, key phrases to use or avoid..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Languages</label>
+        <input class="form-input" placeholder="English, Hindi, Arabic...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('new-persona')">Cancel</button>
+      <button class="btn-primary" onclick="createPersona()">Create Persona</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────
+const clients = [
+  { name: "STRYD Athleisure", vertical: "Athleisure", emoji: "⚡", color: "#F59E0B", channel: "Both", convos: "324/day", csat: "4.8", retainer: "₹85K", status: "active" },
+  { name: "MAISON NOIR", vertical: "Fragrances", emoji: "🌹", color: "#A855F7", channel: "WhatsApp", convos: "187/day", csat: "4.9", retainer: "₹1.1L", status: "active" },
+  { name: "AURA Jewellery", vertical: "Premium Jewellery", emoji: "💎", color: "#F0A500", channel: "WhatsApp", convos: "142/day", csat: "4.7", retainer: "₹95K", status: "active" },
+  { name: "TEMPUS Watches", vertical: "Luxury Watches", emoji: "⌚", color: "#3B82F6", channel: "Both", convos: "98/day", csat: "4.6", retainer: "₹1.2L", status: "active" },
+  { name: "ZEST Lifestyle", vertical: "E-Commerce", emoji: "🛍", color: "#22C55E", channel: "SMS", convos: "412/day", csat: "4.5", retainer: "₹60K", status: "active" },
+  { name: "FORTE Sports", vertical: "Athleisure", emoji: "🏃", color: "#EF4444", channel: "WhatsApp", convos: "89/day", csat: "4.4", retainer: "₹70K", status: "active" },
+  { name: "LUMIÈRE Beauty", vertical: "Fragrances", emoji: "✨", color: "#EC4899", channel: "WhatsApp", convos: "—", csat: "—", retainer: "₹75K", status: "setup" },
+  { name: "ORION Watches", vertical: "Luxury Watches", emoji: "🕰", color: "#64748B", channel: "SMS", convos: "—", csat: "—", retainer: "₹90K", status: "setup" },
+];
+
+const campaigns = [
+  { name: "Summer Drop Hype", brand: "STRYD Athleisure", type: "Broadcast", reach: "12,400", conv: "9.2%", status: "active" },
+  { name: "Abandoned Cart Recovery", brand: "ZEST Lifestyle", type: "Automation", reach: "3,820", conv: "31%", status: "active" },
+  { name: "Anniversary Gifting", brand: "AURA Jewellery", type: "Trigger", reach: "1,240", conv: "22%", status: "active" },
+  { name: "New Scent Teaser", brand: "MAISON NOIR", type: "Broadcast", reach: "8,100", conv: "14%", status: "active" },
+  { name: "Restock Alert — Ref. 04", brand: "TEMPUS Watches", type: "Trigger", reach: "480", conv: "41%", status: "active" },
+  { name: "Post-Purchase Follow-up", brand: "FORTE Sports", type: "Automation", reach: "2,100", conv: "18%", status: "active" },
+  { name: "Birthday Treat", brand: "ZEST Lifestyle", type: "Trigger", reach: "624", conv: "37%", status: "active" },
+  { name: "VIP Early Access", brand: "AURA Jewellery", type: "Broadcast", reach: "340", conv: "58%", status: "active" },
+  { name: "Loyalty Points Reminder", brand: "STRYD Athleisure", type: "Automation", reach: "5,600", conv: "12%", status: "active" },
+  { name: "Re-engagement Series", brand: "MAISON NOIR", type: "Automation", reach: "2,200", conv: "8%", status: "active" },
+];
+
+const activities = [
+  { icon: "💬", bg: "rgba(34,197,94,0.1)", text: "<strong>STRYD Athleisure</strong> — 24 new conversations in the last hour", time: "2 min ago" },
+  { icon: "✅", bg: "rgba(240,165,0,0.1)", text: "<strong>AURA Jewellery</strong> — Cart recovered: ₹42,000 order completed via WhatsApp", time: "7 min ago" },
+  { icon: "🚀", bg: "rgba(59,130,246,0.1)", text: "<strong>MAISON NOIR</strong> — Summer Broadcast sent to 8,100 opted-in customers", time: "14 min ago" },
+  { icon: "⚡", bg: "rgba(168,85,247,0.1)", text: "<strong>TEMPUS Watches</strong> — Human escalation triggered: high-value inquiry (₹2.4L watch)", time: "22 min ago" },
+  { icon: "🌟", bg: "rgba(240,165,0,0.1)", text: "<strong>ZEST Lifestyle</strong> — CSAT score received: 5/5 from customer Priya S.", time: "31 min ago" },
+  { icon: "🔔", bg: "rgba(34,197,94,0.1)", text: "<strong>FORTE Sports</strong> — Restock alert triggered for 89 customers (Midnight collection)", time: "45 min ago" },
+];
+
+const integrations = [
+  { name: "WhatsApp Business API", icon: "💬", provider: "via 360dialog BSP", status: "connected", color: "#25D366" },
+  { name: "Twilio SMS", icon: "📱", provider: "SMS Channel", status: "connected", color: "#F22F46" },
+  { name: "Shopify", icon: "🛍", provider: "E-Commerce", status: "connected", color: "#96BF48" },
+  { name: "HubSpot CRM", icon: "🔶", provider: "CRM", status: "connected", color: "#FF7A59" },
+  { name: "Salesforce", icon: "☁️", provider: "Enterprise CRM", status: "available", color: "#00A1E0" },
+  { name: "WooCommerce", icon: "🛒", provider: "E-Commerce", status: "available", color: "#7F54B3" },
+  { name: "Zoho CRM", icon: "🔷", provider: "CRM", status: "available", color: "#E42527" },
+  { name: "Klaviyo", icon: "📧", provider: "Email Sync", status: "available", color: "#8B5CF6" },
+  { name: "Razorpay", icon: "💳", provider: "Payments", status: "available", color: "#2D6AE0" },
+];
+
+const personas = [
+  { name: "Aria", brand: "STRYD Athleisure", archetype: "Energetic Coach", lang: "EN, HI", emoji: "⚡", color: "#F59E0B" },
+  { name: "Noir", brand: "MAISON NOIR", archetype: "Sensory Storyteller", lang: "EN, FR, AR", emoji: "🌹", color: "#A855F7" },
+  { name: "Luna", brand: "AURA Jewellery", archetype: "Refined Consultant", lang: "EN, HI, AR, FR", emoji: "💎", color: "#F0A500" },
+  { name: "Kron", brand: "TEMPUS Watches", archetype: "Precision Expert", lang: "EN, DE, JA", emoji: "⌚", color: "#3B82F6" },
+  { name: "Zara", brand: "ZEST Lifestyle", archetype: "Helpful Companion", lang: "EN, HI", emoji: "🛍", color: "#22C55E" },
+  { name: "Apex", brand: "FORTE Sports", archetype: "Energetic Coach", lang: "EN, HI", emoji: "🏃", color: "#EF4444" },
+];
+
+// ── RENDER ──────────────────────────────────────────────────────────
+function renderClients(tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.innerHTML = clients.map(c => `
+    <tr>
+      <td>
+        <div class="client-brand">
+          <div class="brand-dot" style="background:${c.color}22;font-size:18px;">${c.emoji}</div>
+          <div>
+            <div class="brand-name">${c.name}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="tag">${c.vertical}</span></td>
+      <td><span class="channel-badge ${c.channel === 'Both' ? 'both' : c.channel === 'SMS' ? 'sms' : 'whatsapp'}">${c.channel === 'Both' ? '◉' : c.channel === 'SMS' ? '📱' : '💬'} ${c.channel}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;">${c.convos}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px;color:${c.csat !== '—' ? 'var(--gold)' : 'var(--text-3)'};">${c.csat !== '—' ? '★ ' + c.csat : '—'}</td>
+      ${tbodyId === 'client-tbody-2' ? `<td style="font-family:'DM Mono',monospace;font-size:13px;">${c.retainer}</td>` : ''}
+      <td><span class="status-pill ${c.status}"><span class="status-dot"></span>${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
+      <td>
+        <a href="simulator.html?brand=${encodeURIComponent(c.name)}" class="demo-link" style="font-size:11px;padding:5px 10px;">▷ Demo</a>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderCampaigns() {
+  document.getElementById('campaigns-list').innerHTML = campaigns.map(c => `
+    <div class="campaign-row">
+      <div>
+        <div class="campaign-name">${c.name}</div>
+        <div class="campaign-brand">${c.brand}</div>
+      </div>
+      <span class="tag">${c.type}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:13px;">${c.reach}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--green);">${c.conv}</span>
+      <span class="status-pill active"><span class="status-dot"></span>Live</span>
+    </div>
+  `).join('');
+}
+
+function renderActivity() {
+  document.getElementById('activity-list').innerHTML = activities.map(a => `
+    <div class="activity-item">
+      <div class="activity-icon" style="background:${a.bg}">${a.icon}</div>
+      <div>
+        <div class="activity-text">${a.text}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPersonas() {
+  document.getElementById('personas-list').innerHTML = `<div style="display:flex;flex-direction:column;gap:12px;">` + personas.map(p => `
+    <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;transition:all 0.15s;cursor:pointer;" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="width:42px;height:42px;border-radius:10px;background:${p.color}22;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">${p.emoji}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px;">${p.name}</div>
+        <div style="font-size:12px;color:var(--text-3);">${p.brand} · ${p.archetype}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;">${p.lang}</div>
+      <a href="simulator.html" class="demo-link" style="font-size:11px;padding:4px 10px;">▷</a>
+    </div>
+  `).join('') + `</div>`;
+}
+
+function renderIntegrations() {
+  document.getElementById('integrations-grid').innerHTML = integrations.map(i => `
+    <div style="padding:18px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:24px;">${i.icon}</span>
+        <div>
+          <div style="font-weight:600;font-size:14px;">${i.name}</div>
+          <div style="font-size:11px;color:var(--text-3);">${i.provider}</div>
+        </div>
+        <div style="margin-left:auto">
+          <span class="status-pill ${i.status === 'connected' ? 'active' : 'paused'}">
+            <span class="status-dot"></span>${i.status === 'connected' ? 'Connected' : 'Available'}
+          </span>
+        </div>
+      </div>
+      ${i.status === 'available' ? `<button class="btn-ghost" style="width:100%;font-size:12px;padding:7px;" onclick="showToast('Connecting to ${i.name}...')">Connect</button>` : `<div style="font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:6px;">✓ <span>Live & syncing</span></div>`}
+    </div>
+  `).join('');
+}
+
+function renderChannels() {
+  const channels = [
+    { name: "WhatsApp Business API", status: "connected", number: "+91 98765 00000", color: "#25D366", desc: "Primary channel · 6 clients active" },
+    { name: "Twilio SMS", status: "connected", number: "+1 (415) 555 0100", color: "#F22F46", desc: "Secondary channel · 3 clients active" },
+    { name: "Voice (IVR) — Beta", status: "paused", number: "Not configured", color: "#8B5CF6", desc: "Voice call fallback · Coming soon" },
+  ];
+  document.getElementById('channels-list').innerHTML = channels.map(c => `
+    <div style="padding:18px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${c.color};flex-shrink:0;${c.status !== 'connected' ? 'opacity:0.4' : ''}"></div>
+        <div style="font-weight:600;">${c.name}</div>
+        <span class="status-pill ${c.status === 'connected' ? 'active' : 'paused'}" style="margin-left:auto">
+          <span class="status-dot"></span>${c.status === 'connected' ? 'Active' : 'Paused'}
+        </span>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-2);margin-bottom:4px;">${c.number}</div>
+      <div style="font-size:12px;color:var(--text-3);">${c.desc}</div>
+    </div>
+  `).join('');
+}
+
+function populateCampaignSelect() {
+  const sel = document.getElementById('campaign-client-select');
+  const sel2 = document.getElementById('persona-client-select');
+  if (sel) sel.innerHTML = clients.map(c => `<option>${c.name}</option>`).join('');
+  if (sel2) sel2.innerHTML = clients.map(c => `<option>${c.name}</option>`).join('');
+}
+
+// ── CHARTS ──────────────────────────────────────────────────────────
+function initCharts() {
+  const days = Array.from({length:30},(_,i)=>{
+    const d = new Date(); d.setDate(d.getDate()-29+i);
+    return d.toLocaleDateString('en',{month:'short',day:'numeric'});
+  });
+  const rand = (min,max,prev) => {
+    const delta = (Math.random()-0.5)*100;
+    const val = Math.max(min,Math.min(max,(prev||800)+delta));
+    return Math.round(val);
+  };
+  const convData = days.reduce((acc,_,i)=>{
+    acc.push(rand(600,1800,acc[i-1])); return acc;
+  },[]);
+
+  const ctx1 = document.getElementById('convChart');
+  if (ctx1) new Chart(ctx1, {
+    type:'line',
+    data:{
+      labels:days,
+      datasets:[{
+        label:'Conversations',
+        data:convData,
+        borderColor:'#F0A500',
+        backgroundColor:'rgba(240,165,0,0.08)',
+        borderWidth:2,
+        pointRadius:0,
+        pointHoverRadius:4,
+        fill:true,
+        tension:0.4
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'#1C2843',borderColor:'#2A3A5C',borderWidth:1,titleColor:'#E8EEF8',bodyColor:'#8DA0C0',padding:10}},
+      scales:{
+        x:{display:false},
+        y:{display:true,grid:{color:'rgba(31,45,74,0.6)'},ticks:{color:'#4A6080',font:{family:'DM Mono',size:11}}}
+      }
+    }
+  });
+
+  const ctx2 = document.getElementById('revenueChart');
+  if (ctx2) new Chart(ctx2, {
+    type:'bar',
+    data:{
+      labels:clients.slice(0,6).map(c=>c.name.split(' ')[0]),
+      datasets:[{label:'Revenue Attributed (₹)',data:[480000,620000,390000,510000,280000,240000],backgroundColor:['#F59E0B','#A855F7','#F0A500','#3B82F6','#22C55E','#EF4444'],borderRadius:6}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C2843',borderColor:'#2A3A5C',borderWidth:1,titleColor:'#E8EEF8',bodyColor:'#8DA0C0'}},scales:{x:{grid:{display:false},ticks:{color:'#4A6080',font:{family:'DM Mono',size:11}}},y:{grid:{color:'rgba(31,45,74,0.6)'},ticks:{color:'#4A6080',font:{family:'DM Mono',size:11}}}}}
+  });
+
+  const ctx3 = document.getElementById('channelChart');
+  if (ctx3) new Chart(ctx3, {
+    type:'doughnut',
+    data:{
+      labels:['WhatsApp','SMS','Both'],
+      datasets:[{data:[58,22,20],backgroundColor:['#25D366','#3B82F6','#A855F7'],borderWidth:0,hoverOffset:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8DA0C0',font:{family:'DM Mono',size:11},padding:16}},tooltip:{backgroundColor:'#1C2843',borderColor:'#2A3A5C',borderWidth:1}}}
+  });
+
+  const ctx4 = document.getElementById('channelCompare');
+  if (ctx4) new Chart(ctx4, {
+    type:'bar',
+    data:{
+      labels:['Open Rate','Conv. Rate','Delivery','Avg Cost/Msg','Reach'],
+      datasets:[
+        {label:'WhatsApp',data:[98,14,98.2,0.8,10],backgroundColor:'rgba(37,211,102,0.7)',borderRadius:4},
+        {label:'SMS',data:[95,11,99.1,1.2,10],backgroundColor:'rgba(59,130,246,0.7)',borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8DA0C0',font:{family:'DM Mono',size:10}}}},scales:{x:{grid:{display:false},ticks:{color:'#4A6080',font:{size:10}}},y:{display:false}}}
+  });
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────────
+function navigate(section, el) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+section).classList.add('active');
+  const titles = {overview:'Overview',clients:'Clients',campaigns:'Campaigns',analytics:'Analytics',personas:'AI Personas',integrations:'Integrations',channels:'Channels'};
+  document.getElementById('page-title').textContent = titles[section] || section;
+
+  // Lazy chart init
+  setTimeout(initCharts, 50);
+}
+
+// ── MODALS ──────────────────────────────────────────────────────────
+function openModal(name) {
+  document.getElementById('modal-'+name).classList.add('open');
+  populateCampaignSelect();
+}
+
+function closeModal(name) {
+  document.getElementById('modal-'+name).classList.remove('open');
+}
+
+function addClient() {
+  const name = document.getElementById('new-brand-name').value.trim();
+  const vertical = document.getElementById('new-brand-vertical').value;
+  const channel = document.getElementById('new-brand-channel').value;
+  if (!name) { showToast('Please enter a brand name'); return; }
+  const emojis = {Athleisure:'⚡','Premium Jewellery':'💎','Fragrances':'🌹','Watches':'⌚','E-Commerce':'🛍','Other':'◈'};
+  const colors = ['#F59E0B','#A855F7','#3B82F6','#22C55E','#EF4444','#EC4899'];
+  clients.push({ name, vertical, emoji: emojis[vertical]||'◈', color: colors[clients.length%colors.length], channel, convos:'—', csat:'—', retainer:'TBD', status:'setup' });
+  renderClients('client-tbody');
+  renderClients('client-tbody-2');
+  closeModal('add-client');
+  showToast(`✓ ${name} added & AI persona creation started`);
+}
+
+function launchCampaign() {
+  closeModal('new-campaign');
+  showToast('✓ Campaign scheduled and launching now');
+}
+
+function createPersona() {
+  closeModal('new-persona');
+  showToast('✓ AI Persona created and training initiated');
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ── CLOSE MODAL ON OVERLAY CLICK ────────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────
+renderClients('client-tbody');
+renderClients('client-tbody-2');
+renderCampaigns();
+renderActivity();
+renderPersonas();
+renderIntegrations();
+renderChannels();
+populateCampaignSelect();
+initCharts();
+
+// Simulate live activity ticker
+setInterval(() => {
+  const newItems = [
+    { icon: "💬", bg: "rgba(34,197,94,0.1)", text: "<strong>ZEST Lifestyle</strong> — 8 new conversations started", time: "just now" },
+    { icon: "✅", bg: "rgba(240,165,0,0.1)", text: "<strong>MAISON NOIR</strong> — New order: Oud Noir 100ml via WhatsApp", time: "just now" },
+    { icon: "⭐", bg: "rgba(168,85,247,0.1)", text: "<strong>TEMPUS Watches</strong> — CSAT 5/5 received from Rajan M.", time: "just now" },
+  ];
+  const randomNew = newItems[Math.floor(Math.random()*newItems.length)];
+  activities.unshift(randomNew);
+  if (activities.length > 8) activities.pop();
+  renderActivity();
+}, 8000);
+</script>
+</body>
+</html>
