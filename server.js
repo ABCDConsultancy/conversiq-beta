@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 
 // ── API PROXY — keeps your key safe on the server ──────────────────────
 app.post('/api/chat', async (req, res) => {
@@ -52,7 +52,7 @@ app.get('/health', (req, res) => {
 
 // ── Fallback — serve simulator for all routes ─────────────────────────
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'simulator.html'));
+  res.sendFile(path.join(__dirname, 'simulator.html'));
 });
 
 app.listen(PORT, () => {
